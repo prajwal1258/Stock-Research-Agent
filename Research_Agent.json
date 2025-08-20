@@ -1,0 +1,313 @@
+{
+  "name": "Research Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Get Chart & Technical Analysis Workflow",
+        "height": 400,
+        "width": 1964
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -992,
+        1136
+      ],
+      "typeVersion": 1,
+      "id": "1",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -896,
+        1264
+      ],
+      "id": "2",
+      "name": "Workflow Input Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3",
+              "name": "Report",
+              "value": "={{ $('Technical Analysis2').item.json.candidates[0].content.parts}}",
+              "type": "string"
+            },
+            {
+              "id": "4",
+              "name": "URL",
+              "value": "={{ $('Download Chart').item.json.url}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        1264
+      ],
+      "id": "4",
+      "name": "response"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -224,
+        1264
+      ],
+      "id": "5",
+      "name": "Download Chart"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.chart-img.com/v2/tradingview/advanced-chart/storage",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "NA"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"theme\": \"dark\",\n  \"interval\": \"1W\",\n  \"symbol\": \"NASDAQ:{{ $json.ticker }}\",\n  \"override\": {\n    \"showStudyLastValue\": false\n  },\n  \"studies\": [\n    {\n      \"name\": \"Volume\",\n      \"forceOverlay\": true\n    },\n    {\n      \"name\": \"MACD\",\n      \"override\": {\n        \"Signal.linewidth\": 2,\n        \"Signal.color\": \"rgb(255,65,129)\"\n      }\n    }\n  ]\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -448,
+        1264
+      ],
+      "id": "6",
+      "name": "Get Chart URL"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7",
+              "name": "ticker",
+              "value": "={{ $json.query }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -672,
+        1264
+      ],
+      "id": "8",
+      "name": "Set Ticker"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-lite"
+        },
+        "text": "# Role\n\nYou are an expert financial analyst specializing in technical analysis of stock charts. Your role is to analyze financial charts provided to you and offer comprehensive insights into the technical aspects, including candlestick patterns, MACD indicators, volume trends, and overall market sentiment. You must provide a detailed breakdown of the chart, highlighting key areas of interest and actionable insights.\n\nWhen analyzing a stock chart, always include the following:\n\n1. **Candlestick Analysis**:\n   - Identify and explain any significant candlestick patterns (e.g., bullish engulfing, doji, hammer).\n   - Comment on the overall trend (bullish, bearish, or sideways).\n   - Highlight any breakout or pullback zones.\n\n2. **MACD Analysis**:\n   - Describe the current state of the MACD line and Signal line (e.g., bullish crossover, bearish crossover).\n   - Discuss the MACD histogram and its implications for momentum.\n   - Identify any divergences between the MACD and the price action.\n\n3. **Volume Analysis**:\n   - Highlight any significant changes in trading volume.\n   - Explain how volume supports or contradicts price movements.\n   - Indicate any unusual spikes in volume that may suggest institutional activity.\n\n4. **Support and Resistance Levels**:\n   - Identify key support and resistance zones based on the chart.\n   - Discuss the importance of these levels for potential reversals or breakouts.\n\n5. **Actionable Insights**:\n   - Provide clear guidance on potential buy, sell, or hold strategies.\n   - Suggest what to watch for in the near term, including confirmation signals or potential risks.\n\n6. **Other Observations**:\n   - Note any patterns or indicators that are relevant to the analysis.\n   - Offer insights into market sentiment or other broader trends based on the chart.\n\nBe clear, concise, and data-driven in your analysis. Your goal is to provide actionable information that traders and investors can use to make informed decisions. Always explain your reasoning for any conclusions you draw from the chart.\n",
+        "inputType": "binary",
+        "simplify": false,
+        "options": {
+          "maxOutputTokens": 300
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1264
+      ],
+      "id": "9",
+      "name": "Technical Analysis2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "NA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "outbound-files",
+        "operation": "uploadFile",
+        "url": "https://r2.chart-img.com/20250903/tradingview/advanced-chart/7b55236e-d087-4bda-9e71-932c7c7c31e8.png",
+        "fileOptions": {}
+      },
+      "type": "n8n-nodes-wassenger.wassenger",
+      "typeVersion": 1,
+      "position": [
+        224,
+        1264
+      ],
+      "id": "10",
+      "name": "UploadFile outbound-files",
+      "credentials": {
+        "wassengerApiKey": {
+          "id": "NA",
+          "name": "Wassenger Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "example@gmail.com",
+        "subject": "Final Report",
+        "emailType": "text",
+        "message": "=Dear User,\n\nI hope this message finds you well. I am pleased to share our latest stock research report, which has been carefully prepared to support your investment decisions with clarity and confidence.\n\nIn this report, we have analyzed the company’s fundamentals, industry outlook, and recent market developments, while highlighting both opportunities and potential risks. Our objective is not only to provide data-driven insights but also to ensure the findings are presented in a way that is transparent, practical, and relevant to your goals.\n\nPlease find the report for your review.\n\n{{ $json.Report }}\n{{ $json.URL }}\n\n\nWarm regards,\nYour Research Analyst Agent",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        672,
+        1264
+      ],
+      "id": "11",
+      "name": "Send a message",
+      "webhookId": "04bd8edc-ae8e-496e-a236-188458695837",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "NA",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Workflow Input Trigger": [
+      {
+        "json": {
+          "query": "MSFT"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Workflow Input Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Ticker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Chart": {
+      "main": [
+        [
+          {
+            "node": "Technical Analysis2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Chart URL": {
+      "main": [
+        [
+          {
+            "node": "Download Chart",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Ticker": {
+      "main": [
+        [
+          {
+            "node": "Get Chart URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Technical Analysis2": {
+      "main": [
+        [
+          {
+            "node": "UploadFile outbound-files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UploadFile outbound-files": {
+      "main": [
+        [
+          {
+            "node": "response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "response": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "570945f8-98f7-44b7-bebb-bba60f4b3049",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "12",
+  "tags": []
+}
